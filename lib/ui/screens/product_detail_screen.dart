@@ -1,4 +1,3 @@
-import 'package:dio_api_products/ui/screens/update_product_screen.dart';
 import 'package:dio_api_products/ui/viewmodels/product_detail_view_model.dart';
 import 'package:dio_api_products/data/repositories/product_repository_interface.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +45,7 @@ class _ProductDetailScreenContentState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Fake Store API"),
+        title: const Text("Detalle del producto"),
         foregroundColor: Colors.white,
         backgroundColor: Colors.deepOrangeAccent,
       ),
@@ -96,26 +95,6 @@ class _ProductDetailScreenContentState
                   Text(product.description),
                   Text(product.category.name),
                   Text(product.rating.rate.toString()),
-                  TextButton(
-                    child: const Text("Update Screen"),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return UpdateProductScreen(
-                              id: product.id,
-                              title: product.title,
-                              price: product.price.toString(),
-                              description: product.description,
-                              image: product.image,
-                              category: product.category.name,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),

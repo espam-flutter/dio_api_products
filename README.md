@@ -1,101 +1,117 @@
 # dio_api_products
 
-Este proyecto consiste en una aplicación móvil desarrollada con Flutter diseñada para la gestión y visualización de productos mediante el consumo de una API REST. El objetivo principal es demostrar una implementación robusta de integración con servicios externos utilizando el paquete Dio, siguiendo principios de arquitectura limpia y desacoplamiento de componentes.
+Aplicación móvil desarrollada con Flutter para la gestión y visualización de productos mediante el consumo de la [Fake Store API](https://fakestoreapi.com/). El proyecto demuestra integración REST con **Dio**, navegación por rutas nombradas y una arquitectura por capas con inversión de dependencias.
 
-La aplicación permite listar productos, ver detalles específicos y gestionar operaciones CRUD conceptuales. El código hace un uso intensivo de las capacidades modernas de Dart, como Null Safety y programación asíncrona (async/await), garantizando un flujo de datos eficiente y un manejo de errores centralizado para mejorar la experiencia del usuario y la mantenibilidad del software.
+## Funcionalidades
+
+| Módulo | Descripción |
+| :--- | :--- |
+| **Listado de productos** | Obtiene todos los productos (`GET /products`). |
+| **Detalle de producto** | Muestra un producto por ID (`GET /products/{id}`). |
+| **Eliminar producto** | Deslizar para borrar (`DELETE /products/{id}`). |
 
 ## Stack y dependencias
 
-A continuación se detallan las tecnologías y librerías principales utilizadas en el desarrollo:
-
-| Dependencia | Propósito | Versión (aprox.) |
+| Dependencia | Propósito | Versión |
 | :--- | :--- | :--- |
-| **Flutter SDK** | Framework de desarrollo multiplataforma | ^3.0.0 |
-| **Dart** | Lenguaje de programación (Null Safety) | ^3.0.0 |
-| **dio** | Cliente HTTP para peticiones REST | ^5.0.0 |
-| **provider** | Gestión de estado y provisión de datos | ^6.0.0 |
-| **get_it** | Service Locator para inyección de dependencias | ^7.0.0 |
-| **cupertino_icons** | Activos visuales para estilo iOS | ^1.0.0 |
-| **flutter_lints** | Análisis estático y buenas prácticas (Dev) | ^3.0.0 |
+| **Flutter SDK** | Framework multiplataforma | SDK ^3.11.5 |
+| **dio** | Cliente HTTP para peticiones REST | ^5.9.2 |
+| **provider** | Gestión de estado (`ChangeNotifier`) | ^6.1.5 |
+| **get_it** | Service Locator / inyección de dependencias | ^9.2.1 |
+| **cupertino_icons** | Iconografía estilo iOS | ^1.0.8 |
+| **flutter_lints** | Análisis estático (dev) | ^6.0.0 |
 
 ## Arquitectura
 
-El proyecto sigue una arquitectura por capas bien definidas para separar la lógica de negocio de la interfaz de usuario, facilitando las pruebas unitarias y el escalamiento.
+El proyecto separa la UI de la lógica de negocio y el acceso a datos, facilitando pruebas y mantenimiento.
 
 **Jerarquía de comunicación:**
-`UI (Screens/Widgets)` → `ViewModel (ChangeNotifier)` → `Repository (Interface/Impl)` → `API Service (Interface/Impl)` → `Dio Client`
+
+`UI (Screens/Widgets)` → `ViewModel (ChangeNotifier)` → `Repository (Interface/Impl)` → `API (Interface/Impl)` → `BaseHttpDio` → `Dio`
 
 **Estructura de carpetas en `lib/`:**
-* **core/helpers:** Contiene la configuración global, como la inicialización del inyector de dependencias (`dependency_injection.dart`) y la configuración base de Dio (`base_http_dio.dart`).
-* **data/models:** Definición de clases de datos y lógica de serialización JSON.
-* **data/api:** Contratos (interfaces) e implementaciones de las fuentes de datos remotas.
-* **data/repository:** Implementación del patrón Repository para actuar como mediador entre la lógica de datos y la UI.
-* **ui/screens:** Pantallas principales de la aplicación.
-* **ui/viewmodels:** Lógica de estado que orquesta los repositorios y notifica a la vista.
-* **ui/widgets:** Componentes reutilizables de la interfaz.
 
-## Conceptos para estudiar y dominar el proyecto
+```
+lib/
+├── main.dart
+├── core/
+│   ├── helpers/
+│   │   ├── base_http_dio.dart
+│   │   ├── dependency_injection.dart
+│   │   ├── http_error.dart
+│   │   └── http_response.dart
+│   └── routes/
+│       ├── app_routes.dart
+│       └── app_router.dart
+├── data/
+│   ├── api/                    # ProductAPI
+│   ├── models/
+│   └── repositories/           # ProductRepository
+└── ui/
+    ├── screens/                # Products, Detail
+    ├── viewmodels/
+    └── widgets/
+```
 
-Para comprender a fondo la implementación de este repositorio, se recomienda revisar los siguientes puntos:
+### Capas principales
 
-1.  **Fundamentos de Dart y Flutter**
-    - [ ] Uso de `Future`, `async` y `await`.
-    - [ ] Sistema de tipos y Null Safety.
-2.  **JSON y Modelado de Datos**
-    - [ ] Mapeo de respuestas de mapas (`Map<String, dynamic>`) a objetos Dart.
-    - [ ] Métodos `fromJson` y `toJson`.
-3.  **Dio y Servicios REST**
-    - [ ] Configuración de `BaseOptions` (baseUrl, timeouts).
-    - [ ] Manejo de objetos `Response` y captura de excepciones con `DioException`.
-4.  **Provider y Gestión de Estado**
-    - [ ] Implementación de `ChangeNotifier` en ViewModels.
-    - [ ] Uso de `notifyListeners()` para actualizar la UI.
-5.  **GetIt e Inyección de Dependencias**
-    - [ ] Registro de Singletons (`registerSingleton`).
-    - [ ] Acceso a servicios mediante `GetIt.instance`.
-6.  **Capas y Contratos**
-    - [ ] Uso de clases abstractas para definir contratos en API y Repositorios.
-    - [ ] Inversión de dependencias.
-7.  **Manejo de Errores y Estados de Carga**
-    - [ ] Control de estados (Cargando, Error, Éxito) en la interfaz de usuario.
+| Capa | Responsabilidad |
+| :--- | :--- |
+| **core/helpers** | DI, HTTP genérico y envoltorio de respuestas. |
+| **core/routes** | Rutas nombradas y generación de pantallas. |
+| **data/api** | Llamadas HTTP de productos. |
+| **data/repository** | Mediador entre ViewModels y APIs. |
+| **data/models** | Serialización JSON (`fromJson`). |
+| **ui/viewmodels** | Estado, carga, errores; notifican con `notifyListeners()`. |
+| **ui/screens** | Interfaz de usuario. |
+
+## Navegación por rutas
+
+La app usa rutas nombradas con `MaterialApp.onGenerateRoute`.
+
+| Ruta | Pantalla | Argumentos |
+| :--- | :--- | :--- |
+| `/products` | `ProductsScreen` | — (pantalla inicial vía `home`) |
+| `/product-detail` | `ProductDetailScreen` | `int` (id del producto) |
 
 ## Flujo de arranque
 
-El ciclo de vida del inicio de la aplicación sigue estrictamente este orden:
+1. **`main()`** → `DependencyInjection.initialize()`.
+2. **`runApp(MyApp)`** → `ChangeNotifierProvider` con `ProductsViewModel`.
+3. **`MaterialApp`** → `home: ProductsScreen`; `onGenerateRoute` para el detalle.
 
-1.  **`main()`**: Punto de entrada donde se asegura la inicialización de los bindings de Flutter.
-2.  **`DependencyInjection.initialize()`**: Se ejecutan los registros en `GetIt`. Se instancian el cliente Dio, los servicios de API y los repositorios.
-3.  **`runApp()`**: Lanza el widget principal de la aplicación.
-4.  **`MultiProvider`**: Envuelve la aplicación (o rutas específicas) inyectando los ViewModels necesarios. Estos ViewModels obtienen sus dependencias (Repositorios) directamente desde `GetIt` al ser instanciados.
+## Conceptos para estudiar y dominar el proyecto
 
-## Referencias oficiales y lecturas recomendadas
-
-* **Flutter Documentation:** [https://docs.flutter.dev](https://docs.flutter.dev)
-* **Dart Async/Await:** [https://dart.dev/guides/language/async-await](https://dart.dev/guides/language/async-await)
-* **Paquete dio:** [https://pub.dev/packages/dio](https://pub.dev/packages/dio)
-* **Paquete provider:** [https://pub.dev/packages/provider](https://pub.dev/packages/provider)
-* **Paquete get_it:** [https://pub.dev/packages/get_it](https://pub.dev/packages/get_it)
-* **FakeStore API (Referencia de datos):** [https://fakestoreapi.com/](https://fakestoreapi.com/)
+1. **Fundamentos de Dart y Flutter** — `Future`, `async` / `await`, Null Safety.
+2. **JSON y modelado de datos** — `fromJson` / `toJson`.
+3. **Dio y REST** — `BaseOptions`, `DioException`, `HttpResponse<T>`.
+4. **Provider** — `ChangeNotifier`, `Consumer`, `context.read`.
+5. **GetIt** — `registerSingleton`, `GetIt.instance`.
+6. **Patrón Repository e interfaces** — `ProductAPI`, `ProductRepository`.
+7. **Navegación** — Rutas nombradas y argumentos.
+8. **Estados de UI** — Cargando, error y éxito.
 
 ## Cómo ejecutar el proyecto
 
-Para poner en marcha el proyecto localmente, asegúrate de tener configurado el SDK de Flutter y ejecuta los siguientes comandos en tu terminal:
+```bash
+flutter pub get
+flutter run
+flutter analyze
+flutter test
+```
 
-1.  **Obtener las dependencias:**
-    ```bash
-    flutter pub get
-    ```
+## Guía para construir el proyecto desde cero
 
-2.  **Ejecutar la aplicación (asegúrate de tener un emulador o dispositivo conectado):**
-    ```bash
-    flutter run
-    ```
+Paso a paso detallado (arquitectura, orden de archivos y pruebas): [docs/GUIA_DESDE_CERO.md](docs/GUIA_DESDE_CERO.md)
 
-3.  **Ejecutar pruebas (si están disponibles):**
-    ```bash
-    flutter test
-    ```
+## Referencias
+
+- [Flutter Documentation](https://docs.flutter.dev)
+- [dio](https://pub.dev/packages/dio)
+- [provider](https://pub.dev/packages/provider)
+- [get_it](https://pub.dev/packages/get_it)
+- [Fake Store API](https://fakestoreapi.com/)
 
 ## Licencia / estado del proyecto
 
-Este proyecto se encuentra actualmente en estado de desarrollo educativo. No cuenta con una licencia formal declarada, por lo que su uso está destinado principalmente a fines de aprendizaje, referencia técnica y demostración de arquitectura en Flutter.
+Proyecto con fines educativos. Sin licencia formal declarada; uso orientado a aprendizaje y referencia de arquitectura Flutter.

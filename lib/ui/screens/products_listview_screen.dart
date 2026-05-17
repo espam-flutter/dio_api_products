@@ -1,21 +1,20 @@
-import 'package:dio_api_products/ui/screens/product_detail_screen.dart';
-import 'package:dio_api_products/ui/viewmodels/products_view_model.dart';
+import 'package:dio_api_products/core/routes/app_routes.dart';
+import 'package:dio_api_products/ui/viewmodels/products_listview_model.dart';
 import 'package:dio_api_products/ui/widgets/product_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({super.key});
+class ProductsListViewScreen extends StatefulWidget {
+  const ProductsListViewScreen({super.key});
 
   @override
-  State<ProductsScreen> createState() => _ProductsScreenState();
+  State<ProductsListViewScreen> createState() => _ProductsScreenState();
 }
 
-class _ProductsScreenState extends State<ProductsScreen> {
+class _ProductsScreenState extends State<ProductsListViewScreen> {
   @override
   void initState() {
     super.initState();
-    // Load products when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<ProductsViewModel>().loadProducts();
@@ -23,14 +22,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   void showDetail(int id) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return ProductDetailScreen(productID: id);
-        },
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.productDetail, arguments: id);
   }
 
   @override
@@ -38,6 +30,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Fake Store API"),
+        automaticallyImplyLeading: false,
         foregroundColor: Colors.white,
         backgroundColor: Colors.deepOrangeAccent,
       ),
